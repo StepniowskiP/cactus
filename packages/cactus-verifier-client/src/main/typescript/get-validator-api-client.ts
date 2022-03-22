@@ -24,6 +24,9 @@ import {
   CordaApiClient,
   CordaApiClientOptions,
 } from "@hyperledger/cactus-plugin-ledger-connector-corda";
+  IrohaApiClient,
+  IrohaApiClientOptions,
+} from "@hyperledger/cactus-plugin-ledger-connector-iroha";
 
 /**
  * Configuration of ApiClients currently supported by Verifier and VerifierFactory
@@ -52,6 +55,10 @@ export type ClientApiConfig = {
     in: CordaApiClientOptions;
     out: CordaApiClient;
   };
+  IROHA: {
+    in: IrohaApiClientOptions;
+    out: IrohaApiClient;
+  };
 };
 
 /**
@@ -73,10 +80,8 @@ export function getValidatorApiClient<K extends keyof ClientApiConfig>(
     case "BESU_1X":
     case "BESU_2X":
       return new BesuApiClient(options as BesuApiClientOptions);
-    case "QUORUM_2X":
-      return new QuorumApiClient(options as QuorumApiClientOptions);
-    case "CORDA_4X":
-      return new CordaApiClient(options as CordaApiClientOptions);
+    case "IROHA":
+      return new IrohaApiClient(options as IrohaApiClientOptions);
     default:
       // Will not compile if any ClientApiConfig key was not handled by this switch
       const _: never = validatorType;
