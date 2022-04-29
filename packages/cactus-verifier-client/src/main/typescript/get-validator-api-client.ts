@@ -24,6 +24,8 @@ import {
   CordaApiClient,
   CordaApiClientOptions,
 } from "@hyperledger/cactus-plugin-ledger-connector-corda";
+
+import {
   IrohaApiClient,
   IrohaApiClientOptions,
 } from "@hyperledger/cactus-plugin-ledger-connector-iroha";
@@ -80,6 +82,10 @@ export function getValidatorApiClient<K extends keyof ClientApiConfig>(
     case "BESU_1X":
     case "BESU_2X":
       return new BesuApiClient(options as BesuApiClientOptions);
+    case "QUORUM_2X":
+      return new QuorumApiClient(options as QuorumApiClientOptions);
+    case "CORDA_4X":
+      return new CordaApiClient(options as CordaApiClientOptions);
     case "IROHA":
       return new IrohaApiClient(options as IrohaApiClientOptions);
     default:
