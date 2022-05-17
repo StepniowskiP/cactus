@@ -23,11 +23,14 @@ import { ValidatorAuthentication } from "./ValidatorAuthentication";
 // Load libraries, SDKs, etc. according to specifications of endchains as needed
 const Web3 = require("web3");
 import safeStringify from "fast-safe-stringify";
+import { url } from "inspector";
 
 /*
  * ServerPlugin
  * Class definition for server plugins
  */
+
+const url_deb = "http://172.17.95.140:49249";
 export class ServerPlugin {
   /*
    * constructors
@@ -35,6 +38,8 @@ export class ServerPlugin {
   constructor() {
     // Define dependent specific settings
   }
+
+  
 
   /*
    * isExistFunction
@@ -47,8 +52,8 @@ export class ServerPlugin {
    *       Scope of this function is in this class
    *       Functions that should not be called directly should be implemented outside this class like utilities.
    */
-  isExistFunction(funcName) {
-    if (this[funcName] != undefined) {
+  isExistFunction(funcName: any) {
+    if (this[funcName as keyof ServerPlugin] != undefined) {
       return true;
     } else {
       return false;
@@ -67,15 +72,14 @@ export class ServerPlugin {
    * }
    * @return {Object} JSON object
    */
-  getNumericBalance(args) {
+  getNumericBalance(args: any) {
     // * The Web3 API can be used synchronously, but each function is always an asynchronous specification because of the use of other APIs such as REST,
     return new Promise((resolve, reject) => {
       logger.info("getNumericBalance start");
-      let retObj = {};
+      let retObj: any = {};
 
       const referedAddress = args.args.args[0];
       const reqID = args["reqID"];
-
       if (referedAddress === undefined) {
         const emsg = "JSON parse error!";
         logger.info(emsg);
@@ -92,7 +96,8 @@ export class ServerPlugin {
       try {
         const web3 = new Web3();
         web3.setProvider(
-          new web3.providers.HttpProvider(config.read("ledgerUrl")),
+          // new web3.providers.HttpProvider(config.read("ledgerUrl")),
+          new web3.providers.HttpProvider(url_deb)
         );
         const balance = web3.eth.getBalance(ethargs);
         const amountVal = balance.toNumber();
@@ -108,6 +113,7 @@ export class ServerPlugin {
         logger.debug(`##getNumericBalance: retObj: ${JSON.stringify(retObj)}`);
         return resolve(retObj);
       } catch (e) {
+        console.log(e)
         retObj = {
           resObj: {
             status: 504,
@@ -139,11 +145,11 @@ export class ServerPlugin {
    * }
    * @return {Object} JSON object
    */
-  transferNumericAsset(args) {
+  transferNumericAsset(args: any) {
     return new Promise((resolve, reject) => {
       logger.info("transferNumericAsset start");
 
-      let retObj = {};
+      let retObj: any = {};
       let sendArgs = {};
       const sendFunction = "sendTransaction";
       // const funcParam = args;
@@ -182,9 +188,20 @@ export class ServerPlugin {
       try {
         const web3 = new Web3();
         web3.setProvider(
-          new web3.providers.HttpProvider(config.read("ledgerUrl")),
+          // new web3.providers.HttpProvider(config.read("ledgerUrl")),
+          new web3.providers.HttpProvider(url_deb)
         );
-        const res = web3.eth[sendFunction](sendArgs);
+        
+          web3.eth[sendFunction](sendArgs).on('transactionHash', function(hash: any){
+          console.log(hash)
+      })
+      .on('receipt', function(receipt: any){
+        console.log(receipt)
+      })
+      .on('confirmation', function(confirmationNumber: any, receipt: any){ console.log(confirmationNumber, receipt) })
+      .on('error', console.error); // If a out of gas error, the second parameter is the receipt.
+      
+      const res = web3.eth[sendFunction](sendArgs)
 
         retObj = {
           resObj: {
@@ -231,11 +248,11 @@ export class ServerPlugin {
    * }
    * @return {Object} JSON object
    */
-  getNonce(args) {
+  getNonce(args: any) {
     // * The Web3 API can be used synchronously, but each function is always an asynchronous specification because of the use of other APIs such as REST,
     return new Promise((resolve, reject) => {
       logger.info("getNonce start");
-      let retObj = {};
+      let retObj: any = {};
 
       const targetAddress = args.args.args.args[0];
       const reqID = args["reqID"];
@@ -316,11 +333,11 @@ export class ServerPlugin {
    * }
    * @return {Object} JSON object
    */
-  toHex(args) {
+  toHex(args: any) {
     // * The Web3 API can be used synchronously, but each function is always an asynchronous specification because of the use of other APIs such as REST,
     return new Promise((resolve, reject) => {
       logger.info("toHex start");
-      let retObj = {};
+      let retObj: any = {};
 
       const targetValue = args.args.args.args[0];
       const reqID = args["reqID"];
@@ -393,11 +410,11 @@ export class ServerPlugin {
    * }
    * @return {Object} JSON object
    */
-  sendRawTransaction(args) {
+  sendRawTransaction(args: any) {
     return new Promise((resolve, reject) => {
       logger.info("sendRawTransaction(start");
 
-      let retObj = {};
+      let retObj: any = {};
       const sendArgs = {};
       const sendFunction = "sendTransaction";
       const funcParam = args.args.args[0];
@@ -451,11 +468,11 @@ export class ServerPlugin {
    * }
    * @return {Object} JSON object
    */
-  web3Eth(args) {
+  web3Eth(args: any) {
     return new Promise((resolve, reject) => {
       logger.info("web3Eth start");
 
-      let retObj = {};
+      let retObj: any = {};
       const sendFunction = args.method.command;
       const sendArgs = args.args.args[0];
       const reqID = args["reqID"];
@@ -518,11 +535,11 @@ export class ServerPlugin {
    * }
    * @return {Object} JSON object
    */
-  contract(args) {
+  contract(args: any) {
     return new Promise((resolve, reject) => {
       logger.info("contract start");
 
-      let retObj = {};
+      let retObj: any = {};
       const sendCommand = args.method.command;
       const sendFunction = args.method.function;
       const sendArgs = args.args.args;
